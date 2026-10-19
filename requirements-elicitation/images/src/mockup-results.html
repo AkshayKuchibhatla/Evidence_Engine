@@ -1,0 +1,62 @@
+<html><head><link rel="stylesheet" href="common.css"><style>
+.page{display:flex;min-height:640px;position:relative}
+.side{width:250px;background:#f4f6fa;border-right:1px solid #dde2ea;padding:18px;font-size:14px}
+.side h4{margin:12px 0 6px;font-size:13px;color:#5b6475;text-transform:uppercase}
+.side div{margin:4px 0}
+.main{flex:1;padding:18px 270px 18px 24px}
+.thesis{background:#eef6f1;border-left:4px solid #006633;padding:10px 14px;margin-bottom:8px;font-size:15px}
+.q{font-size:12.5px;color:#5b6475;margin-bottom:14px;font-family:monospace}
+.card{border:1px solid #c9d0dc;border-radius:10px;padding:14px 16px;margin-bottom:12px;background:#fff}
+.quote{font-size:16px;font-style:italic;line-height:1.45;margin-bottom:8px}
+.quote mark{background:#fff2a8}
+.meta{font-size:13px;color:#3a4356;margin-bottom:8px}
+.acts span{display:inline-block;font-size:13px;border:1px solid #9aa4b5;border-radius:6px;padding:4px 9px;margin-right:6px}
+.sup{background:#dff3e6;color:#1d6b3a}.con{background:#fde4e1;color:#a3261b}.bg{background:#eef1f6}
+.score{float:right;font-weight:bold;font-size:13px;color:#006633}
+</style></head><body>
+<h1>Wireframe 2: Ranked quote results</h1>
+<div class="sub">Low-fidelity concept by the Evidence Engine team. Addresses A4, B3, B4, B6, B8, R4, R5, R12, R13, R14.</div>
+<div class="wf">
+ <div class="bar"><div>Evidence <span class="gold" style="font-size:inherit;opacity:1">Engine</span></div><span>Project: Remote Work Essay &nbsp;|&nbsp; 23 quotes from 14 sources</span></div>
+ <div class="page">
+  <div class="side">
+   <h4>Show</h4>
+   <div>☑ Supporting (17)</div><div>☐ Contrasting (4)</div><div>☐ Background (2)</div>
+   <h4>Source type</h4>
+   <div>☑ Peer-reviewed journal</div><div>☐ Book / chapter</div><div>☐ Dissertation</div>
+   <h4>Database</h4>
+   <div>ProQuest (6) · JSTOR (4)</div><div>EBSCO (3) · Web of Sci. (1)</div>
+   <h4>Sort by</h4><div>● Support strength</div><div>○ Newest · ○ Most cited</div>
+  </div>
+  <div class="main">
+   <div class="thesis"><b>Thesis:</b> Remote work increases employee productivity in knowledge-based industries.</div>
+   <div class="q">Generated query: ("remote work" OR telework* OR "work from home") AND productiv* AND (knowledge OR "white-collar") ▸ edit</div>
+
+   <div class="card"><span class="score">Support ●●●●○</span>
+    <span class="tag sup">Supports</span><span class="tag">Peer-reviewed</span><span class="tag">Cited by 1,240</span>
+    <div class="quote">"…we find that <mark>working from home led to a 13% performance increase</mark>, of which about 9% was from working more minutes per shift…"</div>
+    <div class="meta">Author A., Author B. (2015). <i>Journal of Economics Example</i>, 130(1), <b>p. 165</b> · via ProQuest</div>
+    <div class="acts"><span>📋 Copy quote + APA</span><span>☆ Save</span><span>📄 Open full text (GMU)</span><span>🔍 Show context</span><span>✗ Not relevant</span></div>
+   </div>
+
+   <div class="card"><span class="score">Support ●●●○○</span>
+    <span class="tag sup">Supports</span><span class="tag">Peer-reviewed</span><span class="tag">2021</span>
+    <div class="quote">"Employees who teleworked reported <mark>higher self-rated productivity and fewer interruptions</mark> than office-based peers."</div>
+    <div class="meta">Author C. (2021). <i>Journal of Organizational Example</i>, 42(4), <b>p. 512</b> · via EBSCO</div>
+    <div class="acts"><span>📋 Copy quote + APA</span><span>☆ Save</span><span>📄 Open full text (GMU)</span><span>🔍 Show context</span><span>✗ Not relevant</span></div>
+   </div>
+
+   <div class="card"><span class="score">Contrasts</span>
+    <span class="tag con">Contrasts</span><span class="tag">Peer-reviewed</span><span class="tag">2023</span>
+    <div class="quote">"…fully remote arrangements were associated with <mark>reduced collaboration across teams</mark>…"</div>
+    <div class="meta">Author D. et al. (2023). <i>Nature Human Behaviour Example</i>, 7, <b>p. 44</b> · via Web of Science</div>
+    <div class="acts"><span>📋 Copy quote + APA</span><span>☆ Save</span><span>📄 Open full text (GMU)</span></div>
+   </div>
+  </div>
+  <div class="note" style="top:70px;right:20px">Query shown and editable so students learn Boolean (R3)</div>
+  <div class="note" style="top:230px;right:20px;width:200px">Verbatim quote + page #, never an AI paraphrase (B3, B8)</div>
+  <div class="note" style="top:440px;right:20px;width:200px">Counter-evidence surfaced, like Scite/Consensus (R12, R13)</div>
+ </div>
+</div>
+<div class="sub" style="margin-top:10px">Citations shown are placeholders for layout only.</div>
+</body></html>
