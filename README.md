@@ -3,4 +3,4 @@ An AI agent that searches GMU's library databases to find scholarly sources and 
 
 ## Project documents
 
-- [Requirements elicitation](requirements-elicitation/README.md): notes, recordings, images, and the requirements we derived from them.
+- [Requirements elicitation](Elicitation/ELICITATION.md): notes, recordings, images, and the requirements we derived from them.
