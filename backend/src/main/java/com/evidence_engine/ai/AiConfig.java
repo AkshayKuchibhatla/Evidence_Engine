@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/** Spring beans for the AI. Key from GROQ_API_KEY; never commit it. */
 @Configuration
 public class AiConfig {
 
