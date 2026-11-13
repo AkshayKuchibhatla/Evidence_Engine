@@ -1,4 +1,4 @@
-package com.evidence_engine.backend.ai;
+package com.evidence_engine.ai;
 
 import java.util.ArrayList;
 import java.util.List;

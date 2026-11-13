@@ -26,7 +26,7 @@ class SearchRequestRepositoryTest {
         UUID id = UUID.randomUUID();
 
         repository.add(new SearchRequest(id, "my thesis", "my reason",
-                SearchRequest.Status.PENDING, Instant.now()));
+                SearchRequest.Status.PENDING, Instant.now(), null, null, null, null));
 
         Map<String, Object> row = jdbc
                 .sql("SELECT thesis, reason, status FROM search_requests WHERE id = :id")

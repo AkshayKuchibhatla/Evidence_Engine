@@ -1,4 +1,4 @@
-package com.evidence_engine.backend.ai;
+package com.evidence_engine.ai;
 
 /** AI unreachable or gave a bad answer. */
 public class AiException extends RuntimeException {

@@ -1,4 +1,4 @@
-package com.evidence_engine.backend.ai;
+package com.evidence_engine.ai;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;

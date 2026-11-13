@@ -1,10 +1,13 @@
-package edu.gmu.searchbar;
+package com.evidence_engine.backend;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -58,7 +61,15 @@ public class SearchService {
 	 
 	    /** Sends a GET request with the given query parameters and returns the response body. */
 	    public static String sendGet(String baseUrl, Map<String, String> params) throws IOException {
-	        URL url = new URL(baseUrl + "?" + buildQueryString(params));
+//	        URL url = new URI(baseUrl + "?" + buildQueryString(params)).toURL();
+	        URL url = null;
+			try {
+				url = new URI(baseUrl + "?" + buildQueryString(params)).toURL();
+			} catch (MalformedURLException e) {
+				e.printStackTrace();
+			} catch (URISyntaxException e) {
+				e.printStackTrace();
+			}
 	        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 	 
 	        try {
