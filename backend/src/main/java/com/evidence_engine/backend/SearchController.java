@@ -1,12 +1,10 @@
 package com.evidence_engine.backend;
 
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -20,10 +18,8 @@ public class SearchController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, Object>> submit(@Valid @RequestBody SearchRequestDto dto) throws IOException {
-        SearchRequest created = service.create(dto);
-        return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body(Map.of("id", created.id(), "status", created.status(), "response", created.response()));
+    public ResponseEntity<SearchRequest> submit(@Valid @RequestBody SearchRequestDto dto) throws IOException {
+        return ResponseEntity.ok(service.create(dto));
     }
 
     @GetMapping("/{id}")

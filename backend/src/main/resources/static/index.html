@@ -73,20 +73,32 @@
 				</div>
 
 				<div class="pt-4 flex justify-center">
-					<button type="submit"
-						class="brand-green hover:bg-emerald-800 text-white font-bold px-8 py-3.5 border-2 border-gray-900 shadow-md tracking-wider transition flex items-center space-x-2">
-						<span>SEARCH</span>
-						<svg class="w-5 h-5" fill="none" stroke="currentColor"
-							stroke-width="2" viewBox="0 0 24 24">
-                            <path stroke-linecap="round"
-								stroke-linejoin="round"
+					<button type="submit" id="searchButton"
+						class="brand-green hover:bg-emerald-800 text-white font-bold px-8 py-3.5 border-2 border-gray-900 shadow-md tracking-wider transition flex items-center space-x-2 disabled:opacity-60 disabled:cursor-wait">
+						<span id="searchButtonText">SEARCH</span>
+						<!-- magnifying glass (normal) -->
+						<svg id="searchIcon" class="w-5 h-5" fill="none"
+							stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+					        <path stroke-linecap="round" stroke-linejoin="round"
 								d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
+					    </svg>
+						<!-- spinner (while loading) -->
+						<svg id="loadingIcon" class="hidden w-5 h-5 animate-spin"
+							fill="none" viewBox="0 0 24 24">
+					        <circle class="opacity-25" cx="12" cy="12" r="10"
+								stroke="currentColor" stroke-width="4"></circle>
+					        <path class="opacity-75" fill="currentColor"
+								d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+					    </svg>
 					</button>
 				</div>
 			</form>
 
-			<div id="resultContainer"
+			<p id="searchStatus"
+				class="hidden mt-6 text-center text-sm font-semibold text-gray-700"
+				aria-live="polite"></p>
+
+			<!--<div id="resultContainer"
 				class="mt-8 hidden border-t-2 border-dashed border-gray-300 pt-6">
 				<h3 class="text-sm font-bold text-gray-700 mb-2 uppercase">AI
 					Agent Request Payload:</h3>
@@ -94,57 +106,146 @@
 					class="bg-gray-900 text-emerald-400 p-4 text-xs overflow-x-auto rounded"></pre>
 				<p class="text-xs text-gray-500 mt-2">✨ (Ready to connect your
 					next results page / backend API)</p>
-			</div>
+			</div>-->
+
+			<div id="sourcesList" class="mt-8 space-y-4"></div>
 
 		</div>
 	</main>
 
 	<footer class="brand-green text-white py-4 border-t-4 border-amber-400">
-		<div class="max-w-5xl mx-auto px-6 text-center text-xs">CS 321
-			Project Deliverable 02 (Evidence Engine)</div>
+		<div class="max-w-5xl mx-auto px-6 text-center text-xs">Evidence
+			Engine</div>
 	</footer>
 
 	<script>
-		document.getElementById('evidenceForm').addEventListener(
-				'submit',
-				function(e) {
-					e.preventDefault();
+		function renderSources(data) {
+			const list = document.getElementById('sourcesList');
+			list.innerHTML = '';
 
-					const thesis = document.getElementById('thesis').value;
-					const reason = document.getElementById('reason').value;
+			if (data.status === 'FAILED') {
+				list.textContent = 'Search failed: ' + data.error;
+				return;
+			}
+			if (!data.sources || data.sources.length === 0) {
+				list.textContent = 'No sources found. Try rewording your reason.';
+				return;
+			}
 
-					const payload = {
-						thesis : thesis,
-						reason : reason
-					};
+			data.sources
+					.forEach(function(s, i) {
+						const card = document.createElement('article');
+						card.className = 'border-2 border-gray-800 bg-white p-5 shadow-sm';
 
-					const resultContainer = document
-							.getElementById('resultContainer');
-					const outputJson = document.getElementById('outputJson');
+						const title = document.createElement('a');
+						title.href = s.link;
+						title.target = '_blank';
+						title.rel = 'noopener';
+						title.className = 'text-lg font-bold text-emerald-800 hover:underline';
+						title.textContent = (i + 1) + '. ' + s.title;
 
-					const xhr = new XMLHttpRequest();
-					xhr.open('POST', '/api/search');
-					xhr.setRequestHeader('Content-Type', 'application/json');
+						const meta = document.createElement('p');
+						meta.className = 'mt-1 text-sm text-gray-600';
+						meta.textContent = [ s.authors, s.journal, s.year ]
+								.filter(Boolean).join(' · ');
 
-					// Runs when the server replies (any status code)
-					xhr.onload = function() {
-						if (xhr.status >= 200 && xhr.status < 300) {
-							outputJson.textContent = xhr.responseText; // { "id": "...", "status": "PENDING" }
-						} else {
-							outputJson.textContent = 'Error ' + xhr.status
-									+ ': ' + xhr.responseText;
+						card.append(title, meta);
+
+						if (s.abstractText) {
+							const details = document.createElement('details');
+							details.className = 'mt-3';
+							const summary = document.createElement('summary');
+							summary.className = 'cursor-pointer text-sm font-bold uppercase tracking-wide text-gray-800';
+							summary.textContent = 'Abstract';
+							const text = document.createElement('p');
+							text.className = 'mt-2 whitespace-pre-line text-sm text-gray-800';
+							text.textContent = s.abstractText;
+							details.append(summary, text);
+							card.append(details);
 						}
-						resultContainer.classList.remove('hidden');
-					};
 
-					// Runs only if the server can't be reached at all
-					xhr.onerror = function() {
-						outputJson.textContent = 'Could not reach the server.';
-						resultContainer.classList.remove('hidden');
-					};
+						if (s.doi) {
+							const doi = document.createElement('p');
+							doi.className = 'mt-2 text-xs text-gray-500';
+							doi.textContent = 'DOI: ' + s.doi;
+							card.append(doi);
+						}
 
-					xhr.send(JSON.stringify(payload));
-				});
+						list.append(card);
+					});
+		}
+
+		const button = document.getElementById('searchButton');
+		const buttonText = document.getElementById('searchButtonText');
+		const searchIcon = document.getElementById('searchIcon');
+		const loadingIcon = document.getElementById('loadingIcon');
+		const statusLine = document.getElementById('searchStatus');
+		const sourcesList = document.getElementById('sourcesList');
+
+		let statusTimers = [];
+
+		function setLoading(isLoading) {
+		    button.disabled = isLoading;
+		    buttonText.textContent = isLoading ? 'SEARCHING…' : 'SEARCH';
+		    searchIcon.classList.toggle('hidden', isLoading);
+		    loadingIcon.classList.toggle('hidden', !isLoading);
+
+		    statusTimers.forEach(clearTimeout);
+		    statusTimers = [];
+
+		    if (isLoading) {
+		        showStatus('Turning your thesis and reason into search terms…');
+		        // Timed guesses at what the server is doing (it sends no progress updates yet)
+		        statusTimers.push(setTimeout(() => showStatus('Searching the GMU library…'), 2500));
+		        statusTimers.push(setTimeout(() => showStatus('Still working, almost there…'), 8000));
+		    } else {
+		        statusLine.classList.add('hidden');
+		    }
+		}
+
+		function showStatus(message) {
+		    statusLine.textContent = message;
+		    statusLine.classList.remove('hidden');
+		}
+
+		document.getElementById('evidenceForm').addEventListener('submit', function (e) {
+		    e.preventDefault();
+
+		    const payload = {
+		        thesis: document.getElementById('thesis').value,
+		        reason: document.getElementById('reason').value
+		    };
+
+		    sourcesList.innerHTML = '';   // clear old results right away
+		    setLoading(true);
+
+		    const xhr = new XMLHttpRequest();
+		    xhr.open('POST', '/api/search');
+		    xhr.setRequestHeader('Content-Type', 'application/json');
+
+		    // Runs when the server replies (any status code)
+		    xhr.onload = function () {
+		        if (xhr.status >= 200 && xhr.status < 300) {
+		            renderSources(JSON.parse(xhr.responseText));
+		        } else if (xhr.status === 400) {
+		            sourcesList.textContent = 'Please fill in both the thesis and the reason.';
+		        } else {
+		            sourcesList.textContent = 'Something went wrong (error ' + xhr.status + '). Please try again.';
+		        }
+		    };
+
+		    // Runs only if the server can't be reached at all
+		    xhr.onerror = function () {
+		        sourcesList.textContent = 'Could not reach the server. Is it running?';
+		    };
+
+		    // Runs after onload OR onerror, so the button always comes back
+		    xhr.onloadend = function () {
+		        setLoading(false);
+		    };
+
+		    xhr.send(JSON.stringify(payload));
+		});
 	</script>
 </body>
 </html>

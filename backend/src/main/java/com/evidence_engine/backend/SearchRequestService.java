@@ -28,6 +28,8 @@ import java.util.concurrent.ConcurrentHashMap;
 import com.evidence_engine.ai.QueryPlan;
 import com.evidence_engine.ai.QueryPlanner;
 import com.evidence_engine.ai.AiException;
+import com.evidence_engine.ai.Json;
+import com.evidence_engine.ai.Source;
 
 @Service
 public class SearchRequestService {
@@ -145,6 +147,60 @@ public class SearchRequestService {
 		return PRIMO_API_URL + "?" + joiner;
 	}
 
+	/**
+	 * Pulls title, authors, year, journal, abstract, DOI and link out of each Primo
+	 * result.
+	 */
+	static List<Source> parseSources(String primoJson) {
+		Map<String, Object> root = Json.asMap(Json.parse(primoJson));
+		List<Source> sources = new ArrayList<>();
+
+		for (Object doc : Json.asList(root.get("docs"))) {
+			Map<String, Object> pnx = Json.asMap(Json.asMap(doc).get("pnx"));
+			Map<String, Object> display = Json.asMap(pnx.get("display"));
+			Map<String, Object> addata = Json.asMap(pnx.get("addata"));
+			Map<String, Object> links = Json.asMap(pnx.get("links"));
+			Map<String, Object> control = Json.asMap(pnx.get("control"));
+
+			String title = Json.first(display.get("title"));
+			if (title.isBlank())
+				continue;
+
+			String authors = Json.first(display.get("creator")).replace(" ; ", "; ");
+			String year = Json.first(addata.get("risdate"));
+			String journal = Json.first(addata.get("jtitle"));
+			String abstractText = Json.first(addata.get("abstract"));
+			if (abstractText.isBlank()) {
+				abstractText = Json.first(display.get("description"));
+			}
+			String doi = Json.first(addata.get("doi"));
+			String link = pickLink(links, doi, Json.first(control.get("recordid")));
+
+			sources.add(new Source(title, authors, year, journal, abstractText, doi, link));
+		}
+		return sources;
+	}
+
+	/**
+	 * GMU full-text link if there is one, else the DOI, else the record's page in
+	 * the GMU catalog.
+	 */
+	private static String pickLink(Map<String, Object> links, String doi, String recordId) {
+		for (String key : List.of("linktohtml", "linktopdf")) {
+			String raw = Json.first(links.get(key)); // "$$Uhttp://...$$EHTML$$G..."
+			int start = raw.indexOf("$$U");
+			if (start >= 0) {
+				int end = raw.indexOf("$$", start + 3);
+				return end < 0 ? raw.substring(start + 3) : raw.substring(start + 3, end);
+			}
+		}
+		if (!doi.isBlank()) {
+			return "https://doi.org/" + doi;
+		}
+		return "https://wrlc-gm.primo.exlibrisgroup.com/discovery/fulldisplay?docid="
+				+ URLEncoder.encode(recordId, StandardCharsets.UTF_8) + "&context=PC&vid=01WRLC_GML:01WRLC_GML";
+	}
+
 	public SearchRequest create(SearchRequestDto dto) throws IOException {
 		SearchRequest request = new SearchRequest(UUID.randomUUID(), dto.thesis().trim(), dto.reason().trim(),
 				SearchRequest.Status.PENDING, Instant.now(), null, null, null, null);
@@ -167,12 +223,15 @@ public class SearchRequestService {
 
 		if (request.status() != SearchRequest.Status.FAILED) {
 			try {
-				String apiUrl = toPrimoApiUrl(request.gmuSearchUrl());
-	            String response = sendGet(apiUrl);
-	            request = request.withResponse(response);
-			} catch (IOException e) {
-				request = request.failed("Library search failed: " + e.getMessage());
-				log.warn("Library search failed id={}: {}", request.id(), e.getMessage());
+			    String apiUrl = toPrimoApiUrl(request.gmuSearchUrl());
+			    String response = sendGet(apiUrl);
+			    List<Source> sources = parseSources(response);
+			    request = request.withSources(sources);
+			    log.info("Library search done id={} sources={}", request.id(), sources.size());
+			} catch (IOException | IllegalArgumentException e) {
+			    // IllegalArgumentException = Primo sent back something that isn't valid JSON
+			    request = request.failed("Library search failed: " + e.getMessage());
+			    log.warn("Library search failed id={}: {}", request.id(), e.getMessage());
 			}
 		}
 

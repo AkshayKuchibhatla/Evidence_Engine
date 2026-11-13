@@ -1,7 +1,10 @@
 package com.evidence_engine.backend;
 
 import com.evidence_engine.ai.QueryPlan;
+import com.evidence_engine.ai.Source;
+
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 public record SearchRequest(
@@ -13,7 +16,7 @@ public record SearchRequest(
         String query,          // boolean search string from the AI
         String gmuSearchUrl,   // same search as a GMU library link
         String error,          // why it failed, if it did
-        String response		   // the response JSON
+        List<Source> sources   // parsed library results
 ) {
     public enum Status { PENDING, RUNNING, COMPLETED, FAILED }
     
@@ -27,8 +30,8 @@ public record SearchRequest(
                 null, null, message, null);
     }
     
-    public SearchRequest withResponse(String response) {
+    public SearchRequest withSources(List<Source> sources) {
         return new SearchRequest(id, thesis, reason, status, createdAt,
-                query, gmuSearchUrl, error, response);
+                query, gmuSearchUrl, error, sources);
     }
 }
