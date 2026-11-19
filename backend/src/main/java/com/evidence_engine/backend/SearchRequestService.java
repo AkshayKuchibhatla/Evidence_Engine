@@ -35,14 +35,14 @@ import com.evidence_engine.ai.Source;
 public class SearchRequestService {
 
 	private static final Logger log = LoggerFactory.getLogger(SearchRequestService.class);
-
-	// Placeholder store. Swap for a JPA repository when you add a database.
-	private final Map<UUID, SearchRequest> store = new ConcurrentHashMap<>();
+	
+	private final SearchRequestRepository repository;
 	private final QueryPlanner queryPlanner;
 
-	// Spring passes in the QueryPlanner bean from AiConfig automatically
-	public SearchRequestService(QueryPlanner queryPlanner) {
+	// Spring passes in the QueryPlanner bean from AiConfig and the repository automatically
+	public SearchRequestService(QueryPlanner queryPlanner, SearchRequestRepository repository) {
 		this.queryPlanner = queryPlanner;
+		this.repository = repository;
 	}
 
 	/** Reads an InputStream fully into a String. */
@@ -205,7 +205,7 @@ public class SearchRequestService {
 		SearchRequest request = new SearchRequest(UUID.randomUUID(), dto.thesis().trim(), dto.reason().trim(),
 				SearchRequest.Status.PENDING, Instant.now(), null, null, null, null);
 
-		store.put(request.id(), request);
+		repository.add(request);
 
 		log.info("Search request created id={} status={} thesisLength={} reasonLength={}", request.id(),
 				request.status(), request.thesis().length(), request.reason().length());
@@ -235,11 +235,11 @@ public class SearchRequestService {
 			}
 		}
 
-		store.put(request.id(), request); // save the updated version
+		repository.update(request); // save the updated version
 		return request;
 	}
 
 	public Optional<SearchRequest> find(UUID id) {
-		return Optional.ofNullable(store.get(id));
+		return repository.findById(id);
 	}
 }
